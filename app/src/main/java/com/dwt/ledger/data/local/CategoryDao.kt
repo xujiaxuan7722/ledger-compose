@@ -15,4 +15,16 @@ interface CategoryDao {
 
     @Upsert
     suspend fun upsertAll(categories: List<LocalCategory>)
+
+    @Upsert
+    suspend fun upsert(category: LocalCategory)
+
+    @Query("SELECT * FROM categories WHERE id = :id")
+    suspend fun getById(id: String): LocalCategory?
+
+    @Query("SELECT COALESCE(MAX(sort_order), 0) FROM categories WHERE kind = :kind")
+    suspend fun maxSortOrder(kind: String): Int
+
+    @Query("DELETE FROM categories WHERE id = :id")
+    suspend fun deleteById(id: String)
 }

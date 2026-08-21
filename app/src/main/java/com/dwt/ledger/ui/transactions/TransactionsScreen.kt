@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Savings
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -60,6 +61,7 @@ fun TransactionsScreen(
     onOpenTransaction: (String) -> Unit,
     onOpenStatistics: () -> Unit,
     onOpenBudget: () -> Unit,
+    onOpenManage: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,6 +76,9 @@ fun TransactionsScreen(
                     }
                     IconButton(onClick = onOpenStatistics) {
                         Icon(Icons.Default.PieChart, stringResource(R.string.statistics))
+                    }
+                    IconButton(onClick = onOpenManage) {
+                        Icon(Icons.Outlined.Tune, stringResource(R.string.manage_title))
                     }
                 },
             )

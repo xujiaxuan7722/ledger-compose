@@ -44,4 +44,17 @@
     <string name="over_by">超支 %1$s</string>
     <string name="spent_of">已用 %1$s / %2$s</string>
     <string name="over_budget_banner">本月超支：%1$s</string>
+    <string name="manage_title">分类与账户</string>
+    <string name="add">新增</string>
+    <string name="name">名称</string>
+    <string name="icon">图标</string>
+    <string name="add_category">新增分类</string>
+    <string name="edit_category">编辑分类</string>
+    <string name="add_account">新增账户</string>
+    <string name="edit_account">编辑账户</string>
+    <string name="archive">归档</string>
+    <string name="unarchive">取消归档</string>
+    <string name="archived">已归档</string>
+    <string name="error_name_required">名称不能为空</string>
+    <string name="error_in_use">已有 %1$d 笔记录使用它，无法删除（账户可改为归档）</string>
 </resources>

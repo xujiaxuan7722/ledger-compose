@@ -39,12 +39,46 @@ class FakeTransactionRepository : TransactionRepository {
 
 class FakeCategoryRepository(initial: List<Category> = DefaultDataSeeder.DEFAULT_CATEGORIES) : CategoryRepository {
     val categories = MutableStateFlow(initial)
+    /** 模拟"被 N 笔流水引用"：id -> 笔数 */
+    val usage = mutableMapOf<String, Int>()
+    private var nextId = 1
     override fun observeAll(): Flow<List<Category>> = categories
+    override suspend fun create(name: String, kind: TransactionKind, icon: String): String {
+        val id = "c${nextId++}"
+        categories.update { it + Category(id, name.trim(), kind, icon, (it.maxOfOrNull { c -> c.sortOrder } ?: 0) + 10) }
+        return id
+    }
+    override suspend fun rename(id: String, name: String, icon: String) =
+        categories.update { l -> l.map { if (it.id == id) it.copy(name = name.trim(), icon = icon) else it } }
+    override suspend fun delete(id: String) {
+        val used = usage[id] ?: 0
+        if (used > 0) throw InUseException(used)
+        categories.update { l -> l.filterNot { it.id == id } }
+    }
+    override suspend fun usageCount(id: String): Int = usage[id] ?: 0
 }
 
 class FakeAccountRepository(initial: List<Account> = DefaultDataSeeder.DEFAULT_ACCOUNTS) : AccountRepository {
     val accounts = MutableStateFlow(initial)
+    val usage = mutableMapOf<String, Int>()
+    private var nextId = 1
     override fun observeActive(): Flow<List<Account>> = accounts.map { list -> list.filter { !it.archived } }
+    override fun observeAll(): Flow<List<Account>> = accounts.map { list -> list.sortedBy { it.archived } }
+    override suspend fun create(name: String, icon: String): String {
+        val id = "a${nextId++}"
+        accounts.update { it + Account(id, name.trim(), icon, (it.maxOfOrNull { a -> a.sortOrder } ?: 0) + 10) }
+        return id
+    }
+    override suspend fun rename(id: String, name: String, icon: String) =
+        accounts.update { l -> l.map { if (it.id == id) it.copy(name = name.trim(), icon = icon) else it } }
+    override suspend fun setArchived(id: String, archived: Boolean) =
+        accounts.update { l -> l.map { if (it.id == id) it.copy(archived = archived) else it } }
+    override suspend fun delete(id: String) {
+        val used = usage[id] ?: 0
+        if (used > 0) throw InUseException(used)
+        accounts.update { l -> l.filterNot { it.id == id } }
+    }
+    override suspend fun usageCount(id: String): Int = usage[id] ?: 0
 }
 
 class FakeBudgetRepository : BudgetRepository {

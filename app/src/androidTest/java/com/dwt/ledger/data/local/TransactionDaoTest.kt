@@ -59,4 +59,13 @@ class TransactionDaoTest {
     fun insertWithUnknownCategory_isRejectedByForeignKey() = runTest {
         dao.upsert(tx("bad", 1000).copy(categoryId = "nope"))
     }
+
+    @Test fun countByCategoryAndAccount() = runTest {
+        dao.upsert(tx("a", 1000)); dao.upsert(tx("b", 1001)); dao.upsert(tx("c", 1002).copy(categoryId = "cat_transport", accountId = "acc_wechat"))
+        assertThat(dao.countByCategory("cat_food")).isEqualTo(2)
+        assertThat(dao.countByCategory("cat_transport")).isEqualTo(1)
+        assertThat(dao.countByCategory("nope")).isEqualTo(0)
+        assertThat(dao.countByAccount("acc_cash")).isEqualTo(2)
+        assertThat(dao.countByAccount("acc_wechat")).isEqualTo(1)
+    }
 }

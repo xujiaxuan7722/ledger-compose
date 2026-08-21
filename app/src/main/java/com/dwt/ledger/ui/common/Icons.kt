@@ -21,6 +21,12 @@ import androidx.compose.material.icons.outlined.Wallet
 import androidx.compose.material.icons.outlined.Work
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** 管理页可选的图标键（顺序即展示顺序） */
+val AvailableIcons: List<String> = listOf(
+    "restaurant", "directions_bus", "shopping_bag", "home", "sports_esports", "local_hospital", "school", "more_horiz",
+    "payments", "card_giftcard", "trending_up", "work", "wallet", "chat", "account_balance_wallet", "credit_card", "savings",
+)
+
 /** 分类/账户的图标键 → Material 图标；未知键回退到通用图标 */
 fun iconFor(key: String): ImageVector = when (key) {
     "restaurant" -> Icons.Outlined.Restaurant
