@@ -13,7 +13,7 @@
 | ![](docs/screenshots/05-over-budget.png) | ![](docs/screenshots/06-search.png) | ![](docs/screenshots/07-manage.png) | ![](docs/screenshots/08-csv-menu.png) |
 
 ## 技术栈
-Kotlin 2.1 · Jetpack Compose (Material 3) · Hilt · Room · Coroutines/Flow · Navigation Compose · JUnit4/Truth · GitHub Actions
+Kotlin 2.1 · Jetpack Compose (Material 3) · Hilt · Room · Coroutines/Flow · Navigation Compose · JUnit4/Truth · Compose UI Test · GitHub Actions
 
 ## 架构（单模块，按包分层，依赖只能向下）
 ```
@@ -45,8 +45,8 @@ di/        Hilt 模块
 ```bash
 export ANDROID_HOME=~/Android/Sdk JAVA_HOME=~/.jdks/jdk-17.0.20+8
 ./gradlew assembleDebug            # 编译
-./gradlew testDebugUnitTest        # JVM 单测（领域逻辑 + ViewModel）
-./gradlew connectedDebugAndroidTest  # Room DAO 测试（需模拟器/真机）
+./gradlew testDebugUnitTest          # 66 个 JVM 单测（领域逻辑 + ViewModel，Fake 仓库）
+./gradlew connectedDebugAndroidTest  # 15 个仪器测试：Room DAO/迁移 + Compose UI 端到端（Hilt 测试替身 + 内存库；需模拟器/真机）
 ```
 
 ## 许可
@@ -58,4 +58,6 @@ MIT
 - [x] 预算（按月、总预算或按分类）+ 流水页超支横幅；Room v1→v2 自动迁移 + 迁移测试
 - [x] 分类 / 账户管理：新增、改名换图标、删除（被流水引用时拦截并提示）、账户归档
 - [x] 搜索与筛选：关键词（备注/分类名）× 类型 × 分类 × 账户 × 时间预设，结果带收支汇总
+- [x] Compose UI 测试：记一笔端到端、校验提示、底部导航/菜单导航（HiltTestRunner + @TestInstallIn 内存库）
+- [x] 视觉重设计：参考原项目的蓝色主题 / 渐变结余卡 / 快捷按钮 / 白卡片条目
 - [x] CSV 导出 / 导入（系统文件选择器；导入按名称匹配分类/账户，缺失自动创建，坏行逐条报告）

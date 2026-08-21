@@ -2,6 +2,7 @@ package com.dwt.ledger.ui.addedit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -108,19 +112,21 @@ fun AddEditTransactionScreen(
                 }
             }
 
-            OutlinedTextField(
-                value = state.amountText,
-                onValueChange = viewModel::setAmount,
-                label = { Text(stringResource(R.string.amount)) },
-                placeholder = { Text(stringResource(R.string.amount_hint)) },
-                prefix = { Text("¥") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            SectionCard {
+                OutlinedTextField(
+                    value = state.amountText,
+                    onValueChange = viewModel::setAmount,
+                    label = { Text(stringResource(R.string.amount)) },
+                    placeholder = { Text(stringResource(R.string.amount_hint)) },
+                    prefix = { Text("¥", style = MaterialTheme.typography.headlineSmall) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    textStyle = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
-            Section(stringResource(R.string.category)) {
+            SectionCard { Section(stringResource(R.string.category)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     state.visibleCategories.forEach { c ->
                         FilterChip(
@@ -131,9 +137,9 @@ fun AddEditTransactionScreen(
                         )
                     }
                 }
-            }
+            } }
 
-            Section(stringResource(R.string.account)) {
+            SectionCard { Section(stringResource(R.string.account)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     state.accounts.forEach { a ->
                         FilterChip(
@@ -144,23 +150,31 @@ fun AddEditTransactionScreen(
                         )
                     }
                 }
-            }
+            } }
 
-            Section(stringResource(R.string.date)) {
-                OutlinedButton(onClick = { showDatePicker = true }) {
-                    Icon(Icons.Default.DateRange, null)
-                    Spacer(Modifier.height(0.dp).padding(horizontal = 4.dp))
-                    Text("  " + state.date.displayDate())
+            SectionCard {
+                Section(stringResource(R.string.date)) {
+                    OutlinedButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, null)
+                        Text("  " + state.date.displayDate())
+                    }
                 }
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = state.note,
+                    onValueChange = viewModel::setNote,
+                    label = { Text(stringResource(R.string.note)) },
+                    placeholder = { Text(stringResource(R.string.note_hint)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
-            OutlinedTextField(
-                value = state.note,
-                onValueChange = viewModel::setNote,
-                label = { Text(stringResource(R.string.note)) },
-                placeholder = { Text(stringResource(R.string.note_hint)) },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Button(
+                onClick = viewModel::save,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) { Text(stringResource(R.string.save), style = MaterialTheme.typography.titleMedium) }
+            Spacer(Modifier.height(8.dp))
         }
     }
 
@@ -181,6 +195,17 @@ fun AddEditTransactionScreen(
             dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) } },
         ) { DatePicker(state = pickerState) }
     }
+}
+
+/** 原项目风格：每个分区一张白色圆角卡片 */
+@Composable
+private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) { Column(Modifier.padding(16.dp), content = content) }
 }
 
 @Composable

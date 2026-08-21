@@ -3,13 +3,28 @@ package com.dwt.ledger.ui.transactions
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.RemoveCircleOutline
+import androidx.compose.material.icons.outlined.Search
+import com.dwt.ledger.ui.theme.BrandBlue
+import com.dwt.ledger.ui.theme.BrandBlueDark
+import com.dwt.ledger.ui.theme.BrandNavy
+import com.dwt.ledger.ui.theme.HeroGradient
+import com.dwt.ledger.ui.theme.TileBlue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,9 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,21 +47,19 @@ import com.dwt.ledger.ui.datatransfer.CsvEvent
 import com.dwt.ledger.ui.datatransfer.CsvViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -74,7 +85,7 @@ import com.dwt.ledger.ui.theme.IncomeGreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
-    onAddTransaction: () -> Unit,
+    onAddTransaction: (TransactionKind) -> Unit,
     onOpenTransaction: (String) -> Unit,
     onOpenManage: () -> Unit,
     onOpenSearch: () -> Unit,
@@ -112,11 +123,9 @@ fun TransactionsScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { MonthSwitcher(uiState.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
                 actions = {
-                    IconButton(onClick = onOpenSearch) {
-                        Icon(Icons.Default.Search, stringResource(R.string.search))
-                    }
                     IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more)) }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.manage_title)) }, leadingIcon = { Icon(Icons.Outlined.Tune, null) }, onClick = { menuOpen = false; onOpenManage() })
@@ -130,17 +139,20 @@ fun TransactionsScreen(
                 },
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddTransaction) {
-                Icon(Icons.Default.Add, stringResource(R.string.add_transaction))
-            }
-        },
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 88.dp),
         ) {
-            item { SummaryCard(uiState.summary, Modifier.padding(16.dp)) }
+            item { HeroCard(uiState.summary, Modifier.padding(16.dp, 8.dp, 16.dp, 12.dp)) }
+            item {
+                QuickActions(
+                    onExpense = { onAddTransaction(TransactionKind.EXPENSE) },
+                    onIncome = { onAddTransaction(TransactionKind.INCOME) },
+                    onSearch = onOpenSearch,
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp),
+                )
+            }
             if (uiState.overBudgets.isNotEmpty()) {
                 item { OverBudgetBanner(uiState.overBudgets, modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)) }
             }
@@ -165,18 +177,63 @@ fun TransactionsScreen(
 }
 
 @Composable
-private fun SummaryCard(summary: MonthlySummary, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+private fun HeroCard(summary: MonthlySummary, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxWidth()
+            .shadow(10.dp, MaterialTheme.shapes.large, spotColor = BrandNavy.copy(alpha = 0.35f))
+            .clip(MaterialTheme.shapes.large)
+            .background(HeroGradient)
+            .padding(22.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            SummaryItem(stringResource(R.string.income), summary.income, IncomeGreen)
-            SummaryItem(stringResource(R.string.expense), summary.expense, ExpenseRed)
-            SummaryItem(stringResource(R.string.balance), summary.balance, MaterialTheme.colorScheme.onPrimaryContainer)
+        Column {
+            Text(stringResource(R.string.month_balance), color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            Text(summary.balance.displayYuan(), color = Color.White, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(18.dp))
+            Row(Modifier.fillMaxWidth()) {
+                HeroStat(stringResource(R.string.income), summary.income, Modifier.weight(1f))
+                HeroStat(stringResource(R.string.expense), summary.expense, Modifier.weight(1f))
+            }
+        }
+        Icon(
+            Icons.Outlined.AccountBalanceWallet, null,
+            modifier = Modifier.align(Alignment.TopEnd).size(34.dp),
+            tint = Color.White.copy(alpha = 0.9f),
+        )
+    }
+}
+
+@Composable
+private fun HeroStat(label: String, amount: Money, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(label, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
+        Text(amount.displayYuan(), color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+/** 原项目首页的三个浅蓝圆角快捷按钮 */
+@Composable
+private fun QuickActions(onExpense: () -> Unit, onIncome: () -> Unit, onSearch: () -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        QuickAction(stringResource(R.string.quick_expense), Icons.Outlined.RemoveCircleOutline, onExpense, Modifier.weight(1f))
+        QuickAction(stringResource(R.string.quick_income), Icons.Outlined.AddCircleOutline, onIncome, Modifier.weight(1f))
+        QuickAction(stringResource(R.string.search), Icons.Outlined.Search, onSearch, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun QuickAction(label: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(76.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = TileBlue,
+        border = BorderStroke(1.dp, BrandBlue.copy(alpha = 0.35f)),
+    ) {
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Icon(icon, null, tint = BrandBlue, modifier = Modifier.size(26.dp))
+            Spacer(Modifier.height(6.dp))
+            Text(label, color = BrandBlueDark, style = MaterialTheme.typography.labelLarge)
         }
     }
 }
@@ -185,6 +242,7 @@ private fun SummaryCard(summary: MonthlySummary, modifier: Modifier = Modifier) 
 private fun OverBudgetBanner(items: List<OverBudget>, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -200,48 +258,41 @@ private fun OverBudgetBanner(items: List<OverBudget>, modifier: Modifier = Modif
 }
 
 @Composable
-private fun SummaryItem(label: String, amount: Money, color: Color) {
-    Column {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
-        Spacer(Modifier.height(4.dp))
-        Text(amount.displayYuan(), style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.SemiBold)
-    }
-}
-
-@Composable
 private fun DayHeader(day: DayGroup) {
-    Column {
-        HorizontalDivider()
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(day.date.displayDay(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text((if (day.net.cents >= 0) "+" else "") + day.net.displayYuan(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 14.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(day.date.displayDay(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text((if (day.net.cents >= 0) "+" else "") + day.net.displayYuan(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun TransactionRow(item: TransactionItem, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(40.dp)) {
-            Icon(iconFor(item.categoryIcon), null, modifier = Modifier.padding(8.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = MaterialTheme.shapes.small, color = TileBlue, modifier = Modifier.size(44.dp)) {
+                Icon(iconFor(item.categoryIcon), null, modifier = Modifier.padding(10.dp), tint = BrandBlue)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(item.categoryName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                val sub = listOf(item.accountName, item.note).filter { it.isNotBlank() }.joinToString(" · ")
+                if (sub.isNotBlank()) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                item.amount.displaySigned(item.kind),
+                style = MaterialTheme.typography.titleSmall,
+                color = if (item.kind == TransactionKind.INCOME) IncomeGreen else ExpenseRed,
+                fontWeight = FontWeight.Bold,
+            )
         }
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(item.categoryName, style = MaterialTheme.typography.bodyLarge)
-            val sub = listOf(item.accountName, item.note).filter { it.isNotBlank() }.joinToString(" · ")
-            if (sub.isNotBlank()) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text(
-            item.amount.displaySigned(item.kind),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (item.kind == TransactionKind.INCOME) IncomeGreen else ExpenseRed,
-            fontWeight = FontWeight.Medium,
-        )
     }
 }

@@ -69,7 +69,9 @@ class AddEditTransactionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val transactionId: String? = savedStateHandle[LedgerRoutes.ARG_TRANSACTION_ID]
-    private val form = MutableStateFlow(FormState(date = LocalDate.now(clock), isEditing = transactionId != null, isLoading = transactionId != null))
+    private val initialKind: TransactionKind =
+        savedStateHandle.get<String>(LedgerRoutes.ARG_KIND)?.let { runCatching { TransactionKind.valueOf(it) }.getOrNull() } ?: TransactionKind.EXPENSE
+    private val form = MutableStateFlow(FormState(date = LocalDate.now(clock), kind = initialKind, isEditing = transactionId != null, isLoading = transactionId != null))
 
     val uiState: StateFlow<AddEditUiState> = combine(
         form, categoryRepository.observeAll(), accountRepository.observeActive(),

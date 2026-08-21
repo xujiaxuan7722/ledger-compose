@@ -75,7 +75,7 @@ fun ManageScreen(onBack: () -> Unit, viewModel: ManageViewModel = hiltViewModel(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = viewModel::openCreate) { Icon(Icons.Default.Add, stringResource(R.string.add)) }
+            FloatingActionButton(onClick = viewModel::openCreate, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) { Icon(Icons.Default.Add, stringResource(R.string.add)) }
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {

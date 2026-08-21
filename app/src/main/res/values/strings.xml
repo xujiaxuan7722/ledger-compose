@@ -18,7 +18,7 @@
     <string name="back">返回</string>
     <string name="previous_month">上个月</string>
     <string name="next_month">下个月</string>
-    <string name="empty_month">这个月还没有记录，点右下角记一笔</string>
+    <string name="empty_month">这个月还没有记录，点上方「记支出」开始</string>
     <string name="error_amount_invalid">请输入大于 0 的金额</string>
     <string name="error_category_required">请选择分类</string>
     <string name="error_account_required">请选择账户</string>
@@ -72,4 +72,7 @@
     <string name="import_done">已导入 %1$d 条记录</string>
     <string name="import_done_with_errors">已导入 %1$d 条，%2$d 行被跳过（%3$s）</string>
     <string name="transfer_failed">操作失败：%1$s</string>
+    <string name="month_balance">本月结余</string>
+    <string name="quick_expense">记支出</string>
+    <string name="quick_income">记收入</string>
 </resources>

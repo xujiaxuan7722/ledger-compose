@@ -29,6 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dwt.ledger.R
+import com.dwt.ledger.domain.model.TransactionKind
 import com.dwt.ledger.ui.addedit.AddEditTransactionScreen
 import com.dwt.ledger.ui.budget.BudgetScreen
 import com.dwt.ledger.ui.manage.ManageScreen
@@ -43,9 +44,13 @@ object LedgerRoutes {
     const val MANAGE = "manage"
     const val SEARCH = "search"
     const val ARG_TRANSACTION_ID = "transactionId"
-    const val ADD_EDIT = "addEdit?$ARG_TRANSACTION_ID={$ARG_TRANSACTION_ID}"
-    fun addEdit(transactionId: String? = null): String =
-        if (transactionId == null) "addEdit" else "addEdit?$ARG_TRANSACTION_ID=$transactionId"
+    const val ARG_KIND = "kind"
+    const val ADD_EDIT = "addEdit?$ARG_TRANSACTION_ID={$ARG_TRANSACTION_ID}&$ARG_KIND={$ARG_KIND}"
+    fun addEdit(transactionId: String? = null, kind: TransactionKind? = null): String = buildString {
+        append("addEdit?")
+        if (transactionId != null) append("$ARG_TRANSACTION_ID=$transactionId&")
+        if (kind != null) append("$ARG_KIND=${kind.name}&")
+    }.trimEnd('&', '?')
 }
 
 /** 底部导航的三个顶层目的地 */
@@ -91,7 +96,7 @@ fun LedgerNavGraph(navController: NavHostController = rememberNavController()) {
         NavHost(navController = navController, startDestination = LedgerRoutes.TRANSACTIONS, modifier = Modifier.padding(padding)) {
             composable(LedgerRoutes.TRANSACTIONS) {
                 TransactionsScreen(
-                    onAddTransaction = { navController.navigate(LedgerRoutes.addEdit()) },
+                    onAddTransaction = { kind -> navController.navigate(LedgerRoutes.addEdit(kind = kind)) },
                     onOpenTransaction = { id -> navController.navigate(LedgerRoutes.addEdit(id)) },
                     onOpenManage = { navController.navigate(LedgerRoutes.MANAGE) },
                     onOpenSearch = { navController.navigate(LedgerRoutes.SEARCH) },
@@ -108,7 +113,10 @@ fun LedgerNavGraph(navController: NavHostController = rememberNavController()) {
             }
             composable(
                 route = LedgerRoutes.ADD_EDIT,
-                arguments = listOf(navArgument(LedgerRoutes.ARG_TRANSACTION_ID) { type = NavType.StringType; nullable = true; defaultValue = null }),
+                arguments = listOf(
+                    navArgument(LedgerRoutes.ARG_TRANSACTION_ID) { type = NavType.StringType; nullable = true; defaultValue = null },
+                    navArgument(LedgerRoutes.ARG_KIND) { type = NavType.StringType; nullable = true; defaultValue = null },
+                ),
             ) {
                 AddEditTransactionScreen(onDone = { navController.popBackStack() })
             }

@@ -30,8 +30,8 @@ import com.dwt.ledger.ui.theme.IncomeGreen
 
 /** 环形图的配色，按占比排名循环使用 */
 val ChartPalette = listOf(
-    Color(0xFF1E6F5C), Color(0xFFE07A5F), Color(0xFF3D5A80), Color(0xFFF2CC8F),
-    Color(0xFF81B29A), Color(0xFF9C6ADE), Color(0xFF6D8EA0), Color(0xFFBC6C25),
+    Color(0xFF4272F4), Color(0xFF36D1DC), Color(0xFFF2A65A), Color(0xFF9C6ADE),
+    Color(0xFF3D5A80), Color(0xFFE07A5F), Color(0xFF81B29A), Color(0xFFF2CC8F),
 )
 
 fun sliceColor(index: Int): Color = ChartPalette[index % ChartPalette.size]
