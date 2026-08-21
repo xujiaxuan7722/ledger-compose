@@ -68,4 +68,11 @@
     <string name="result_count">共 %1$d 笔</string>
     <string name="result_summary">收入 %1$s · 支出 %2$s</string>
     <string name="no_results">没有符合条件的记录</string>
+    <string name="more">更多</string>
+    <string name="export_csv">导出 CSV</string>
+    <string name="import_csv">导入 CSV</string>
+    <string name="export_done">已导出 %1$d 条记录</string>
+    <string name="import_done">已导入 %1$d 条记录</string>
+    <string name="import_done_with_errors">已导入 %1$d 条，%2$d 行被跳过（%3$s）</string>
+    <string name="transfer_failed">操作失败：%1$s</string>
 </resources>

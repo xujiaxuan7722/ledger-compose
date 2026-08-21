@@ -1,5 +1,8 @@
 package com.dwt.ledger.ui.transactions
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +19,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.dwt.ledger.ui.datatransfer.CsvEvent
+import com.dwt.ledger.ui.datatransfer.CsvViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
@@ -65,10 +82,36 @@ fun TransactionsScreen(
     onOpenManage: () -> Unit,
     onOpenSearch: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
+    csvViewModel: CsvViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val csvEvent by csvViewModel.event.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbar = remember { SnackbarHostState() }
+    var menuOpen by remember { mutableStateOf(false) }
+
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+        if (uri != null) csvViewModel.export { csv ->
+            withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)!!.use { it.write(csv.toByteArray()) } }
+        }
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) csvViewModel.import {
+            withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)!!.use { it.readBytes().toString(Charsets.UTF_8) } }
+        }
+    }
+    csvEvent?.let { ev ->
+        val text = when (ev) {
+            is CsvEvent.Exported -> stringResource(R.string.export_done, ev.rows)
+            is CsvEvent.Imported -> if (ev.summary.errors.isEmpty()) stringResource(R.string.import_done, ev.summary.imported)
+                else stringResource(R.string.import_done_with_errors, ev.summary.imported, ev.summary.errors.size, ev.summary.errors.first())
+            is CsvEvent.Failed -> stringResource(R.string.transfer_failed, ev.reason)
+        }
+        LaunchedEffect(ev) { snackbar.showSnackbar(text); csvViewModel.consumeEvent() }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { MonthSwitcher(uiState.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
@@ -84,6 +127,15 @@ fun TransactionsScreen(
                     }
                     IconButton(onClick = onOpenManage) {
                         Icon(Icons.Outlined.Tune, stringResource(R.string.manage_title))
+                    }
+                    IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more)) }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.export_csv)) }, onClick = {
+                            menuOpen = false; exportLauncher.launch("ledger-${uiState.yearMonth}.csv")
+                        })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.import_csv)) }, onClick = {
+                            menuOpen = false; importLauncher.launch(arrayOf("text/*", "text/csv", "text/comma-separated-values", "application/octet-stream"))
+                        })
                     }
                 },
             )
