@@ -1,0 +1,44 @@
+# 记账本（ledger）
+
+一个用现代 Android 技术栈从零重写的个人记账 App，课程设计项目。
+架构与工程实践参照 [android/architecture-samples](https://github.com/android/architecture-samples)，数据建模参照 [Ivy Wallet](https://github.com/Ivy-Apps/ivy-wallet) 的指南。
+
+## 技术栈
+Kotlin 2.1 · Jetpack Compose (Material 3) · Hilt · Room · Coroutines/Flow · Navigation Compose · JUnit4/Truth · GitHub Actions
+
+## 架构（单模块，按包分层，依赖只能向下）
+```
+ui/        Compose 屏幕 + ViewModel（每屏一个 UiState，单向数据流）
+  transactions/   流水列表 + 月度概览
+  addedit/        记一笔 / 编辑
+  navigation/     单 Activity + NavHost
+domain/    纯 Kotlin，不依赖 Android
+  model/          Money(分) / Transaction / Category / Account
+  logic/          月度汇总、月份区间等纯函数
+data/      TransactionRepository 等接口 + Room 实现（实体与领域模型分离）
+di/        Hilt 模块
+```
+数据流：Room DAO 返回 `Flow` → Repository 映射成领域模型 → ViewModel `combine` 成 `StateFlow<UiState>` → Compose 订阅。
+任何写入都会自动刷新所有订阅页面，不存在"返回时手动重载"。
+
+## 关键设计决策
+- 金额用 `value class Money(cents: Long)`，杜绝浮点误差；时间用 `Instant`，显示时按时区转本地日期。
+- 所有实体用 UUID 主键；分类、账户是独立实体（内置数据首次启动写入）。
+- 记账允许支出大于收入——记账本记录事实，不是银行。
+- Room `exportSchema=true`，schema JSON 进仓库，为将来迁移做准备。
+
+## 运行
+```bash
+export ANDROID_HOME=~/Android/Sdk JAVA_HOME=~/.jdks/jdk-17.0.20+8
+./gradlew assembleDebug            # 编译
+./gradlew testDebugUnitTest        # JVM 单测（领域逻辑 + ViewModel）
+./gradlew connectedDebugAndroidTest  # Room DAO 测试（需模拟器/真机）
+```
+
+## 路线图
+- [x] MVP：记一笔 / 流水按日分组 / 月度收支结余 / 编辑删除
+- [ ] 分类占比图、月度趋势
+- [ ] 预算（按月、按分类）+ 超支提醒
+- [ ] 分类 / 账户管理
+- [ ] 搜索与筛选
+- [ ] CSV 导出 / 备份恢复
