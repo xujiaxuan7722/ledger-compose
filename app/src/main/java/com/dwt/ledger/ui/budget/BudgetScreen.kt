@@ -1,6 +1,7 @@
 package com.dwt.ledger.ui.budget
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -17,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -52,14 +52,14 @@ import com.dwt.ledger.ui.theme.ExpenseRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel()) {
+fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0), // 顶层页面：状态栏/导航栏由 TopAppBar 与底部导航处理
         topBar = {
             CenterAlignedTopAppBar(
                 title = { MonthSwitcher(state.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) } },
             )
         },
         floatingActionButton = {

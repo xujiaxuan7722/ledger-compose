@@ -9,9 +9,14 @@ Kotlin 2.1 · Jetpack Compose (Material 3) · Hilt · Room · Coroutines/Flow ·
 ## 架构（单模块，按包分层，依赖只能向下）
 ```
 ui/        Compose 屏幕 + ViewModel（每屏一个 UiState，单向数据流）
-  transactions/   流水列表 + 月度概览
+  transactions/   流水列表 + 月度概览 + 超支横幅（底部导航 Tab 1）
+  statistics/     分类占比环形图 + 6 个月趋势（Tab 2）
+  budget/         预算列表与设置（Tab 3）
   addedit/        记一笔 / 编辑
-  navigation/     单 Activity + NavHost
+  search/         搜索与筛选
+  manage/         分类与账户管理
+  datatransfer/   CSV 导出 / 导入（SAF）
+  navigation/     单 Activity + NavHost + 底部导航栏
 domain/    纯 Kotlin，不依赖 Android
   model/          Money(分) / Transaction / Category / Account
   logic/          月度汇总、月份区间等纯函数

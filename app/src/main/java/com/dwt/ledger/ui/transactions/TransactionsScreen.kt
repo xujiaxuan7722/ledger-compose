@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,10 +34,8 @@ import com.dwt.ledger.ui.datatransfer.CsvEvent
 import com.dwt.ledger.ui.datatransfer.CsvViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,8 +76,6 @@ import com.dwt.ledger.ui.theme.IncomeGreen
 fun TransactionsScreen(
     onAddTransaction: () -> Unit,
     onOpenTransaction: (String) -> Unit,
-    onOpenStatistics: () -> Unit,
-    onOpenBudget: () -> Unit,
     onOpenManage: () -> Unit,
     onOpenSearch: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
@@ -111,6 +108,7 @@ fun TransactionsScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0), // 顶层页面：状态栏/导航栏由 TopAppBar 与底部导航处理
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             CenterAlignedTopAppBar(
@@ -119,17 +117,9 @@ fun TransactionsScreen(
                     IconButton(onClick = onOpenSearch) {
                         Icon(Icons.Default.Search, stringResource(R.string.search))
                     }
-                    IconButton(onClick = onOpenBudget) {
-                        Icon(Icons.Outlined.Savings, stringResource(R.string.budget))
-                    }
-                    IconButton(onClick = onOpenStatistics) {
-                        Icon(Icons.Default.PieChart, stringResource(R.string.statistics))
-                    }
-                    IconButton(onClick = onOpenManage) {
-                        Icon(Icons.Outlined.Tune, stringResource(R.string.manage_title))
-                    }
                     IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more)) }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.manage_title)) }, leadingIcon = { Icon(Icons.Outlined.Tune, null) }, onClick = { menuOpen = false; onOpenManage() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.export_csv)) }, onClick = {
                             menuOpen = false; exportLauncher.launch("ledger-${uiState.yearMonth}.csv")
                         })
@@ -152,7 +142,7 @@ fun TransactionsScreen(
         ) {
             item { SummaryCard(uiState.summary, Modifier.padding(16.dp)) }
             if (uiState.overBudgets.isNotEmpty()) {
-                item { OverBudgetBanner(uiState.overBudgets, onClick = onOpenBudget, modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)) }
+                item { OverBudgetBanner(uiState.overBudgets, modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)) }
             }
             if (uiState.isEmpty) {
                 item {
@@ -192,9 +182,9 @@ private fun SummaryCard(summary: MonthlySummary, modifier: Modifier = Modifier) 
 }
 
 @Composable
-private fun OverBudgetBanner(items: List<OverBudget>, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun OverBudgetBanner(items: List<OverBudget>, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
