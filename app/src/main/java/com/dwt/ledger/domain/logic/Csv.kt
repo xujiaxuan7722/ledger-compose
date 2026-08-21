@@ -33,7 +33,7 @@ object Csv {
         accountNameById: Map<String, String>,
         zone: ZoneId,
     ): String = buildString {
-        append('﻿').append(HEADER).append('\n')
+        append('\uFEFF').append(HEADER).append('\n')
         transactions.forEach { t ->
             val fields = listOf(
                 t.occurredAt.atZone(zone).toLocalDate().format(DATE),
@@ -49,7 +49,7 @@ object Csv {
 
     /** 解析：容忍 BOM、CRLF、带引号字段；逐行校验，坏行进 errors，不影响好行 */
     fun parse(text: String): CsvParseResult {
-        val lines = text.removePrefix("﻿").split("\r\n", "\n").filter { it.isNotBlank() }
+        val lines = text.removePrefix("\uFEFF").split("\r\n", "\n").filter { it.isNotBlank() }
         if (lines.isEmpty()) return CsvParseResult(emptyList(), listOf("文件为空"))
         val rows = mutableListOf<CsvRow>(); val errors = mutableListOf<String>()
         val body = if (lines.first().trim() == HEADER) lines.drop(1) else lines

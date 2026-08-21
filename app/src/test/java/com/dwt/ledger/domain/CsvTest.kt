@@ -20,7 +20,7 @@ class CsvTest {
     @Test fun `export writes BOM header and escapes commas and quotes`() {
         val csv = Csv.export(tx, names, accounts, zone)
         val lines = csv.split("\n")
-        assertThat(lines[0]).isEqualTo("﻿" + Csv.HEADER)
+        assertThat(lines[0]).isEqualTo("\uFEFF" + Csv.HEADER)
         assertThat(lines[1]).isEqualTo("2026-08-21,支出,12.50,餐饮,现金,\"午饭, 面条\"")
         assertThat(lines[2]).isEqualTo("2026-08-01,收入,5000.00,工资,银行卡,\"说\"\"谢谢\"\"\"")
     }
@@ -47,5 +47,5 @@ class CsvTest {
         assertThat(r.errors[0]).contains("第 2 行"); assertThat(r.errors[1]).contains("收入/支出"); assertThat(r.errors[2]).contains("金额"); assertThat(r.errors[3]).contains("分类/账户")
     }
 
-    @Test fun `empty file`() { assertThat(Csv.parse("﻿\n").errors).containsExactly("文件为空") }
+    @Test fun `empty file`() { assertThat(Csv.parse("\uFEFF\n").errors).containsExactly("文件为空") }
 }

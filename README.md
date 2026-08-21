@@ -3,6 +3,15 @@
 一个用现代 Android 技术栈从零重写的个人记账 App，课程设计项目。
 架构与工程实践参照 [android/architecture-samples](https://github.com/android/architecture-samples)，数据建模参照 [Ivy Wallet](https://github.com/Ivy-Apps/ivy-wallet) 的指南。
 
+## 截图
+| 流水 | 记一笔 | 统计 | 预算 |
+|---|---|---|---|
+| ![](docs/screenshots/01-transactions.png) | ![](docs/screenshots/02-add.png) | ![](docs/screenshots/03-statistics.png) | ![](docs/screenshots/04-budget.png) |
+
+| 超支提醒 | 搜索 | 分类管理 | 导入导出 |
+|---|---|---|---|
+| ![](docs/screenshots/05-over-budget.png) | ![](docs/screenshots/06-search.png) | ![](docs/screenshots/07-manage.png) | ![](docs/screenshots/08-csv-menu.png) |
+
 ## 技术栈
 Kotlin 2.1 · Jetpack Compose (Material 3) · Hilt · Room · Coroutines/Flow · Navigation Compose · JUnit4/Truth · GitHub Actions
 
@@ -39,6 +48,9 @@ export ANDROID_HOME=~/Android/Sdk JAVA_HOME=~/.jdks/jdk-17.0.20+8
 ./gradlew testDebugUnitTest        # JVM 单测（领域逻辑 + ViewModel）
 ./gradlew connectedDebugAndroidTest  # Room DAO 测试（需模拟器/真机）
 ```
+
+## 许可
+MIT
 
 ## 路线图
 - [x] MVP：记一笔 / 流水按日分组 / 月度收支结余 / 编辑删除
