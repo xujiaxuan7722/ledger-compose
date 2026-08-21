@@ -46,3 +46,20 @@ class FakeAccountRepository(initial: List<Account> = DefaultDataSeeder.DEFAULT_A
     val accounts = MutableStateFlow(initial)
     override fun observeActive(): Flow<List<Account>> = accounts.map { list -> list.filter { !it.archived } }
 }
+
+class FakeBudgetRepository : BudgetRepository {
+    private val store = MutableStateFlow<Map<String, com.dwt.ledger.domain.model.Budget>>(emptyMap())
+    private var nextId = 1
+    val all: List<com.dwt.ledger.domain.model.Budget> get() = store.value.values.toList()
+    fun seed(vararg budgets: com.dwt.ledger.domain.model.Budget) = store.update { it + budgets.associateBy { b -> b.id } }
+
+    override fun observeForMonth(yearMonth: java.time.YearMonth): Flow<List<com.dwt.ledger.domain.model.Budget>> =
+        store.map { m -> m.values.filter { it.yearMonth == yearMonth } }
+    override suspend fun getBudget(id: String) = store.value[id]
+    override suspend fun setBudget(yearMonth: java.time.YearMonth, categoryId: String?, limit: Money): String {
+        val id = "b${nextId++}"
+        store.update { m -> m.filterValues { !(it.yearMonth == yearMonth && it.categoryId == categoryId) } + (id to com.dwt.ledger.domain.model.Budget(id, categoryId, yearMonth, limit)) }
+        return id
+    }
+    override suspend fun delete(id: String) = store.update { it - id }
+}

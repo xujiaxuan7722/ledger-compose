@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.SportsEsports
@@ -38,5 +39,6 @@ fun iconFor(key: String): ImageVector = when (key) {
     "chat" -> Icons.AutoMirrored.Outlined.Chat
     "account_balance_wallet" -> Icons.Outlined.AccountBalanceWallet
     "credit_card" -> Icons.Outlined.CreditCard
+    "savings" -> Icons.Outlined.Savings
     else -> Icons.Outlined.Category
 }

@@ -40,6 +40,11 @@ android {
         all { it.testLogging { events("passed", "skipped", "failed") } }
     }
 
+    sourceSets {
+        // 把导出的 Room schema 作为 androidTest 资源，供 MigrationTestHelper 读取
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+
     packaging {
         resources.excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
     }

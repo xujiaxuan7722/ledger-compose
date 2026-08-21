@@ -3,9 +3,12 @@ package com.dwt.ledger.ui.transactions
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dwt.ledger.data.AccountRepository
+import com.dwt.ledger.data.BudgetRepository
 import com.dwt.ledger.data.CategoryRepository
 import com.dwt.ledger.data.TransactionRepository
+import com.dwt.ledger.domain.logic.BudgetProgress
 import com.dwt.ledger.domain.logic.MonthlySummary
+import com.dwt.ledger.domain.logic.computeBudgetProgress
 import com.dwt.ledger.domain.logic.summarize
 import com.dwt.ledger.domain.logic.toRange
 import com.dwt.ledger.domain.model.Account
@@ -37,6 +40,8 @@ data class TransactionItem(
     val note: String,
 )
 
+data class OverBudget(val title: String, val overBy: Money)
+
 data class DayGroup(
     val date: LocalDate,
     /** 当日净额：收入 - 支出 */
@@ -48,6 +53,8 @@ data class TransactionsUiState(
     val yearMonth: YearMonth,
     val summary: MonthlySummary = MonthlySummary.EMPTY,
     val days: List<DayGroup> = emptyList(),
+    /** 本月已超支的预算（用于提醒横幅），按分类名展示 */
+    val overBudgets: List<OverBudget> = emptyList(),
     val isLoading: Boolean = true,
 ) {
     val isEmpty: Boolean get() = !isLoading && days.isEmpty()
@@ -59,10 +66,12 @@ class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     categoryRepository: CategoryRepository,
     accountRepository: AccountRepository,
+    budgetRepository: BudgetRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
     private val yearMonth = MutableStateFlow(YearMonth.now(clock))
+    private val budgetsForMonth = yearMonth.flatMapLatest { budgetRepository.observeForMonth(it) }
 
     private val transactionsForMonth = yearMonth.flatMapLatest { ym ->
         val range = ym.toRange(clock.zone)
@@ -74,11 +83,19 @@ class TransactionsViewModel @Inject constructor(
         transactionsForMonth,
         categoryRepository.observeAll(),
         accountRepository.observeActive(),
-    ) { ym, transactions, categories, accounts ->
+        budgetsForMonth,
+    ) { ym, transactions, categories, accounts, budgets ->
+        val categoryById = categories.associateBy { it.id }
         TransactionsUiState(
             yearMonth = ym,
             summary = transactions.summarize(),
             days = groupByDay(transactions, categories, accounts),
+            overBudgets = computeBudgetProgress(budgets, transactions).filter(BudgetProgress::isOver).map { p ->
+                OverBudget(
+                    title = if (p.budget.isTotal) "总预算" else categoryById[p.budget.categoryId]?.name ?: "未分类",
+                    overBy = p.spent - p.budget.limit,
+                )
+            },
             isLoading = false,
         )
     }.stateIn(

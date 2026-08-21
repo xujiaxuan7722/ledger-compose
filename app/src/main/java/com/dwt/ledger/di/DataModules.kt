@@ -3,12 +3,15 @@ package com.dwt.ledger.di
 import android.content.Context
 import androidx.room.Room
 import com.dwt.ledger.data.AccountRepository
+import com.dwt.ledger.data.BudgetRepository
+import com.dwt.ledger.data.DefaultBudgetRepository
 import com.dwt.ledger.data.CategoryRepository
 import com.dwt.ledger.data.DefaultAccountRepository
 import com.dwt.ledger.data.DefaultCategoryRepository
 import com.dwt.ledger.data.DefaultTransactionRepository
 import com.dwt.ledger.data.TransactionRepository
 import com.dwt.ledger.data.local.AccountDao
+import com.dwt.ledger.data.local.BudgetDao
 import com.dwt.ledger.data.local.CategoryDao
 import com.dwt.ledger.data.local.LedgerDatabase
 import com.dwt.ledger.data.local.TransactionDao
@@ -31,6 +34,9 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindAccountRepository(impl: DefaultAccountRepository): AccountRepository
+
+    @Binds @Singleton
+    abstract fun bindBudgetRepository(impl: DefaultBudgetRepository): BudgetRepository
 }
 
 @Module
@@ -43,4 +49,5 @@ object DatabaseModule {
     @Provides fun provideTransactionDao(db: LedgerDatabase): TransactionDao = db.transactionDao()
     @Provides fun provideCategoryDao(db: LedgerDatabase): CategoryDao = db.categoryDao()
     @Provides fun provideAccountDao(db: LedgerDatabase): AccountDao = db.accountDao()
+    @Provides fun provideBudgetDao(db: LedgerDatabase): BudgetDao = db.budgetDao()
 }

@@ -33,4 +33,15 @@
     <string name="total">合计</string>
     <string name="empty_statistics">本月没有这类记录</string>
     <string name="trend_title">近 %1$d 个月收支</string>
+    <string name="budget">预算</string>
+    <string name="add_budget">设置预算</string>
+    <string name="edit_budget">修改预算</string>
+    <string name="budget_scope">范围</string>
+    <string name="total_budget">总预算</string>
+    <string name="budget_limit">预算额度</string>
+    <string name="empty_budget">本月还没有预算，点右下角设置一个</string>
+    <string name="remaining">剩余 %1$s</string>
+    <string name="over_by">超支 %1$s</string>
+    <string name="spent_of">已用 %1$s / %2$s</string>
+    <string name="over_budget_banner">本月超支：%1$s</string>
 </resources>

@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -57,6 +59,7 @@ fun TransactionsScreen(
     onAddTransaction: () -> Unit,
     onOpenTransaction: (String) -> Unit,
     onOpenStatistics: () -> Unit,
+    onOpenBudget: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -66,6 +69,9 @@ fun TransactionsScreen(
             CenterAlignedTopAppBar(
                 title = { MonthSwitcher(uiState.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
                 actions = {
+                    IconButton(onClick = onOpenBudget) {
+                        Icon(Icons.Outlined.Savings, stringResource(R.string.budget))
+                    }
                     IconButton(onClick = onOpenStatistics) {
                         Icon(Icons.Default.PieChart, stringResource(R.string.statistics))
                     }
@@ -83,6 +89,9 @@ fun TransactionsScreen(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 88.dp),
         ) {
             item { SummaryCard(uiState.summary, Modifier.padding(16.dp)) }
+            if (uiState.overBudgets.isNotEmpty()) {
+                item { OverBudgetBanner(uiState.overBudgets, onClick = onOpenBudget, modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)) }
+            }
             if (uiState.isEmpty) {
                 item {
                     Text(
@@ -116,6 +125,24 @@ private fun SummaryCard(summary: MonthlySummary, modifier: Modifier = Modifier) 
             SummaryItem(stringResource(R.string.income), summary.income, IncomeGreen)
             SummaryItem(stringResource(R.string.expense), summary.expense, ExpenseRed)
             SummaryItem(stringResource(R.string.balance), summary.balance, MaterialTheme.colorScheme.onPrimaryContainer)
+        }
+    }
+}
+
+@Composable
+private fun OverBudgetBanner(items: List<OverBudget>, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+    ) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.onErrorContainer)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                stringResource(R.string.over_budget_banner, items.joinToString("、") { "${it.title} ${it.overBy.displayYuan()}" }),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
         }
     }
 }

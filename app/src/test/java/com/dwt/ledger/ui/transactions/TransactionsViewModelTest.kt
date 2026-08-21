@@ -1,6 +1,8 @@
 package com.dwt.ledger.ui.transactions
 
 import com.dwt.ledger.data.FakeAccountRepository
+import com.dwt.ledger.data.FakeBudgetRepository
+import com.dwt.ledger.domain.model.Budget
 import com.dwt.ledger.data.FakeCategoryRepository
 import com.dwt.ledger.data.FakeTransactionRepository
 import com.dwt.ledger.domain.model.Money
@@ -29,6 +31,7 @@ class TransactionsViewModelTest {
     private val now = Instant.parse("2026-08-21T06:00:00Z") // 2026-08-21 14:00 北京
     private val clock = Clock.fixed(now, zone)
     private lateinit var transactions: FakeTransactionRepository
+    private lateinit var budgets: FakeBudgetRepository
     private lateinit var viewModel: TransactionsViewModel
 
     private fun at(date: String, hour: Int = 12): Instant =
@@ -36,7 +39,8 @@ class TransactionsViewModelTest {
 
     @Before fun setUp() {
         transactions = FakeTransactionRepository()
-        viewModel = TransactionsViewModel(transactions, FakeCategoryRepository(), FakeAccountRepository(), clock)
+        budgets = FakeBudgetRepository()
+        viewModel = TransactionsViewModel(transactions, FakeCategoryRepository(), FakeAccountRepository(), budgets, clock)
     }
 
     /** stateIn(WhileSubscribed) 需要有订阅者才会开始计算 */
@@ -89,5 +93,18 @@ class TransactionsViewModelTest {
         transactions.seed(Transaction("x", TransactionKind.EXPENSE, Money(100), "cat_deleted", "acc_cash", at("2026-08-01")))
         val item = viewModel.uiState.value.days.single().items.single()
         assertThat(item.categoryName).isEqualTo("未分类")
+    }
+
+    @Test fun `over budget banner lists only exceeded budgets`() = runTest {
+        transactions.seed(Transaction("a", TransactionKind.EXPENSE, Money(4000), "cat_food", "acc_cash", at("2026-08-05")))
+        budgets.seed(
+            Budget("b1", "cat_food", YearMonth.of(2026, 8), Money(3000)),   // 超 10 元
+            Budget("b2", null, YearMonth.of(2026, 8), Money(100000)),       // 未超
+            Budget("b3", "cat_food", YearMonth.of(2026, 7), Money(1)),      // 别的月份
+        )
+        val over = viewModel.uiState.value.overBudgets
+        assertThat(over).hasSize(1)
+        assertThat(over.single().title).isEqualTo("餐饮")
+        assertThat(over.single().overBy).isEqualTo(Money(1000))
     }
 }
