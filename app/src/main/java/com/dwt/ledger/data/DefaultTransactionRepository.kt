@@ -23,6 +23,8 @@ class DefaultTransactionRepository @Inject constructor(
     override fun observeBetween(start: Instant, endExclusive: Instant): Flow<List<Transaction>> =
         dao.observeBetween(start.toEpochMilli(), endExclusive.toEpochMilli()).map { it.toDomain() }
 
+    override fun observeAll(): Flow<List<Transaction>> = dao.observeAll().map { it.toDomain() }
+
     override fun observeTransaction(id: String): Flow<Transaction?> =
         dao.observeById(id).map { it?.toDomain() }
 

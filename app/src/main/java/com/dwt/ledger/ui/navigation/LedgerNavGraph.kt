@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.dwt.ledger.ui.addedit.AddEditTransactionScreen
 import com.dwt.ledger.ui.budget.BudgetScreen
 import com.dwt.ledger.ui.manage.ManageScreen
+import com.dwt.ledger.ui.search.SearchScreen
 import com.dwt.ledger.ui.statistics.StatisticsScreen
 import com.dwt.ledger.ui.transactions.TransactionsScreen
 
@@ -18,6 +19,7 @@ object LedgerRoutes {
     const val STATISTICS = "statistics"
     const val BUDGET = "budget"
     const val MANAGE = "manage"
+    const val SEARCH = "search"
     const val ARG_TRANSACTION_ID = "transactionId"
     const val ADD_EDIT = "addEdit?$ARG_TRANSACTION_ID={$ARG_TRANSACTION_ID}"
     fun addEdit(transactionId: String? = null): String =
@@ -34,6 +36,13 @@ fun LedgerNavGraph(navController: NavHostController = rememberNavController()) {
                 onOpenStatistics = { navController.navigate(LedgerRoutes.STATISTICS) },
                 onOpenBudget = { navController.navigate(LedgerRoutes.BUDGET) },
                 onOpenManage = { navController.navigate(LedgerRoutes.MANAGE) },
+                onOpenSearch = { navController.navigate(LedgerRoutes.SEARCH) },
+            )
+        }
+        composable(LedgerRoutes.SEARCH) {
+            SearchScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTransaction = { id -> navController.navigate(LedgerRoutes.addEdit(id)) },
             )
         }
         composable(LedgerRoutes.MANAGE) {

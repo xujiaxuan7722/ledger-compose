@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.Tune
@@ -62,6 +63,7 @@ fun TransactionsScreen(
     onOpenStatistics: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenManage: () -> Unit,
+    onOpenSearch: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -71,6 +73,9 @@ fun TransactionsScreen(
             CenterAlignedTopAppBar(
                 title = { MonthSwitcher(uiState.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
                 actions = {
+                    IconButton(onClick = onOpenSearch) {
+                        Icon(Icons.Default.Search, stringResource(R.string.search))
+                    }
                     IconButton(onClick = onOpenBudget) {
                         Icon(Icons.Outlined.Savings, stringResource(R.string.budget))
                     }

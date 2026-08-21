@@ -14,6 +14,9 @@ interface TransactionDao {
     )
     fun observeBetween(startMillis: Long, endMillis: Long): Flow<List<LocalTransaction>>
 
+    @Query("SELECT * FROM transactions ORDER BY occurred_at DESC, created_at DESC")
+    fun observeAll(): Flow<List<LocalTransaction>>
+
     @Query("SELECT * FROM transactions WHERE id = :id")
     fun observeById(id: String): Flow<LocalTransaction?>
 

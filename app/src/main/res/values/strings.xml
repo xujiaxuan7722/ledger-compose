@@ -57,4 +57,15 @@
     <string name="archived">已归档</string>
     <string name="error_name_required">名称不能为空</string>
     <string name="error_in_use">已有 %1$d 笔记录使用它，无法删除（账户可改为归档）</string>
+    <string name="search">搜索</string>
+    <string name="search_hint">搜备注或分类名</string>
+    <string name="kind">类型</string>
+    <string name="clear_filters">清除</string>
+    <string name="range_all">全部</string>
+    <string name="range_this_month">本月</string>
+    <string name="range_last_3_months">近三个月</string>
+    <string name="range_this_year">今年</string>
+    <string name="result_count">共 %1$d 笔</string>
+    <string name="result_summary">收入 %1$s · 支出 %2$s</string>
+    <string name="no_results">没有符合条件的记录</string>
 </resources>

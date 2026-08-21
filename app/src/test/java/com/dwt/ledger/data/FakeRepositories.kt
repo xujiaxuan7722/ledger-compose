@@ -24,6 +24,8 @@ class FakeTransactionRepository : TransactionRepository {
                 .sortedWith(compareByDescending<Transaction> { it.occurredAt }.thenByDescending { it.createdAt })
         }
 
+    override fun observeAll(): Flow<List<Transaction>> =
+        store.map { m -> m.values.sortedWith(compareByDescending<Transaction> { it.occurredAt }.thenByDescending { it.createdAt }) }
     override fun observeTransaction(id: String): Flow<Transaction?> = store.map { it[id] }
     override suspend fun getTransaction(id: String): Transaction? = store.value[id]
 
