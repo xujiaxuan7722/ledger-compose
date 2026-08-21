@@ -15,9 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -44,7 +43,7 @@ import com.dwt.ledger.R
 import com.dwt.ledger.domain.logic.MonthlySummary
 import com.dwt.ledger.domain.model.Money
 import com.dwt.ledger.domain.model.TransactionKind
-import com.dwt.ledger.ui.common.display
+import com.dwt.ledger.ui.common.MonthSwitcher
 import com.dwt.ledger.ui.common.displayDay
 import com.dwt.ledger.ui.common.displaySigned
 import com.dwt.ledger.ui.common.displayYuan
@@ -57,6 +56,7 @@ import com.dwt.ledger.ui.theme.IncomeGreen
 fun TransactionsScreen(
     onAddTransaction: () -> Unit,
     onOpenTransaction: (String) -> Unit,
+    onOpenStatistics: () -> Unit,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,17 +64,12 @@ fun TransactionsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = viewModel::previousMonth) {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.previous_month))
-                        }
-                        Text(uiState.yearMonth.display(), style = MaterialTheme.typography.titleLarge)
-                        IconButton(onClick = viewModel::nextMonth) {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.next_month))
-                        }
+                title = { MonthSwitcher(uiState.yearMonth, viewModel::previousMonth, viewModel::nextMonth) },
+                actions = {
+                    IconButton(onClick = onOpenStatistics) {
+                        Icon(Icons.Default.PieChart, stringResource(R.string.statistics))
                     }
-                }
+                },
             )
         },
         floatingActionButton = {

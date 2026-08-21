@@ -27,4 +27,10 @@
     <string name="pick_date">选择日期</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
+    <string name="statistics">统计</string>
+    <string name="income_share">收入构成</string>
+    <string name="expense_share">支出构成</string>
+    <string name="total">合计</string>
+    <string name="empty_statistics">本月没有这类记录</string>
+    <string name="trend_title">近 %1$d 个月收支</string>
 </resources>
